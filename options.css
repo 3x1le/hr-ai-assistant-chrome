@@ -1,0 +1,90 @@
+:root {
+  --bg: #eef1f0;
+  --surface: #ffffff;
+  --ink: #1c2623;
+  --muted: #55645f;
+  --line: #c9d2cf;
+  --accent: #1f6f66;
+  --stop: #6b2f2f;
+  --minus: #a33b2e;
+  --plus: #2f6b3b;
+  color-scheme: light dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #151c1a; --surface: #1d2724; --ink: #e4ebe9; --muted: #a2b2ad; --line: #34423e; --accent: #4fb3a6; --stop: #d28c8c; --minus: #e0806f; --plus: #7fc28a; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 system-ui, sans-serif; }
+header, main { max-width: 760px; margin: 0 auto; padding: 0 20px; }
+header { padding-top: 32px; }
+h1 { margin: 0 0 8px; font-size: 24px; }
+h2 { margin: 0 0 6px; font-size: 18px; }
+section { margin: 36px 0; }
+p { margin: 0 0 10px; }
+.hint, .hint-inline { color: var(--muted); font-size: 13.5px; }
+.saved { color: var(--accent); min-height: 1.4em; font-size: 13.5px; }
+label { display: block; margin: 12px 0; font-weight: 600; }
+label.check { font-weight: 400; display: flex; gap: 8px; align-items: flex-start; }
+label.check input { width: auto; margin-top: 4px; }
+input, select, textarea {
+  display: block; width: 100%; margin-top: 4px; padding: 8px 10px; font: inherit; font-weight: 400;
+  color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 6px;
+}
+input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 1px;
+}
+textarea { resize: vertical; }
+button {
+  font: inherit; font-weight: 600; padding: 8px 14px; cursor: pointer; color: var(--ink);
+  background: var(--surface); border: 1px solid var(--line); border-radius: 6px;
+}
+button:hover { border-color: var(--accent); }
+button.danger { color: var(--minus); font-weight: 400; }
+.actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+code { font-size: 13px; }
+
+/* Критерии: цвет полосы слева кодирует тип правила */
+.rule { display: grid; grid-template-columns: 22px 150px 120px 1fr; gap: 8px; margin: 0 0 12px; padding: 10px 10px 10px 12px;
+  background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--minus); border-radius: 6px; }
+.rule.stop { border-left-color: var(--stop); }
+.rule.plus { border-left-color: var(--plus); }
+.rule input, .rule select { margin-top: 0; }
+.rule .desc { grid-column: 1 / -1; grid-row: 2; }
+.rule textarea { margin-top: 0; min-height: 5.2em; resize: vertical; line-height: 1.45; }
+.rule .wide { grid-column: 1 / -1; grid-row: 3; }
+.rule .foot { grid-column: 4; grid-row: 1; display: flex; justify-content: flex-end; align-items: center; gap: 6px; }
+.rule .move { padding: 4px 10px; font-weight: 400; }
+.rule .move:disabled { opacity: .35; cursor: default; }
+.grip { align-self: center; text-align: center; cursor: grab; user-select: none; color: var(--muted); font-size: 16px; letter-spacing: -3px; }
+.grip:active { cursor: grabbing; }
+.rule.dragging { opacity: .45; }
+.rule.drop-before { box-shadow: 0 -3px 0 var(--accent); }
+.rule.drop-after { box-shadow: 0 3px 0 var(--accent); }
+#rules { margin-top: 12px; }
+
+.fact { margin: 0 0 14px; padding: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; }
+.fact label { margin: 8px 0; font-size: 14px; }
+.fact .foot { display: flex; justify-content: flex-end; }
+
+@media (max-width: 600px) {
+  .rule { grid-template-columns: 1fr; }
+  .rule .desc, .rule .wide, .rule .foot { grid-column: 1 / -1; grid-row: auto; }
+  .grip { display: none; }
+  .two { grid-template-columns: 1fr; }
+}
+
+h3 { margin: 22px 0 6px; font-size: 16px; }
+.rule.ans { grid-template-columns: 22px 170px 1fr auto; border-left-color: var(--accent); }
+.rule.ans.ban { border-left-color: var(--minus); }
+.rule.ans.canned { border-left-color: var(--plus); }
+.rule.ans input { grid-column: 3; }
+.rule.ans .foot { grid-column: 4; }
+@media (max-width: 600px) {
+  .rule.ans { grid-template-columns: 1fr; }
+  .rule.ans input, .rule.ans .foot { grid-column: 1 / -1; }
+}
+
+fieldset.mode { margin: 12px 0; padding: 0; border: 0; }
+fieldset.mode legend { padding: 0; margin-bottom: 4px; font-weight: 600; }
+fieldset.mode label.check { margin: 8px 0; }

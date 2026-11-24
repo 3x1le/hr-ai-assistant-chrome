@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Настройки: помощник по вакансиям</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <header>
+    <h1>Помощник по вакансиям hh.ru</h1>
+    <p>Всё, что вы вводите здесь, хранится в вашем браузере. Текст вакансии, резюме и факты отправляются только выбранной вами модели. Если это локальная Ollama, данные не покидают компьютер.</p>
+    <p class="saved" id="saved" role="status"></p>
+  </header>
+
+  <main>
+    <section>
+      <h2>Модель</h2>
+      <p class="hint">Подойдёт любой сервис с OpenAI-совместимым API: облачный с бесплатным тарифом или локальная Ollama.</p>
+      <label>Быстрый выбор
+        <select id="preset">
+          <option value="">Выберите…</option>
+          <option value="https://generativelanguage.googleapis.com/v1beta/openai">Google AI Studio</option>
+          <option value="https://openrouter.ai/api/v1">OpenRouter</option>
+          <option value="http://localhost:11434/v1">Ollama на этом компьютере</option>
+        </select>
+      </label>
+      <label>Адрес API
+        <input id="baseUrl" type="url" placeholder="https://…/v1">
+      </label>
+      <label>Ключ API <span class="hint-inline">(для Ollama не нужен)</span>
+        <input id="apiKey" type="password" autocomplete="off">
+      </label>
+      <label>Название модели
+        <input id="model" type="text" placeholder="например, qwen2.5:7b для Ollama">
+      </label>
+      <div class="actions">
+        <button id="check" type="button">Проверить подключение</button>
+        <span id="check-result" role="status"></span>
+      </div>
+      <label class="check">
+        <input id="showModelInfo" type="checkbox">
+        Показывать в панели на странице вакансии блок с моделью и лимитами (для Open router: оставшиеся запросы и токены)
+      </label>
+      <p class="hint">Для Ollama разрешите запросы от расширений: запустите её с переменной <code>OLLAMA_ORIGINS=chrome-extension://*</code>. Подробности в README.</p>
+    </section>
+
+    <section>
+      <h2>Резюме</h2>
+      <p class="hint">Вставьте текст резюме. Модель берёт из него только то, что там есть.</p>
+      <textarea id="resume" rows="10"></textarea>
+    </section>
+
+    <section>
+      <h2>Критерии оценки вакансий</h2>
+      <fieldset class="mode">
+        <legend>Режим оценки</legend>
+        <label class="check">
+          <input type="radio" name="evalMode" value="free">
+          <span><b>Свободный.</b> Модель сама оценивает вакансию: даёт свои плюсы и минусы на основании собственных размышлений и при этом проверяет ваши критерии.</span>
+        </label>
+        <label class="check">
+          <input type="radio" name="evalMode" value="strict">
+          <span><b>Строгий</b> (рекомендуется для локальных и слабых моделей). Модель только проверяет, есть ли в вакансии то, что описано в ваших критериях. Своих плюсов и минусов она не добавляет, а оценка считается программой по вашим весам.</span>
+        </label>
+        <p class="hint">Строгий режим рекомендуется для локальных LLM и слабых моделей: им проще проверить список критериев, чем рассуждать самостоятельно. Ответы получаются короче, реже ломают формат и не расходятся с вашими критериями. Резюме в этом режиме в оценке не участвует.</p>
+      </fieldset>
+      <p class="hint">Описывайте в критерии явление так, как оно выглядит в вакансии («работа только в офисе»), а не как его отсутствие («нет удалёнки»). Отсутствие критерия в тексте вакансии не считается ни плюсом, ни минусом.</p>
+      <p class="hint">Опишите смыслом, а не только словами: модель найдёт и другие формулировки. Ключевые слова необязательны: они помогают ничего не пропустить и подсвечиваются на странице сразу. Можно писать корень слова, например «стрессоустойч».</p>
+      <p class="hint">Порядок можно менять: потяните критерий за ⋮⋮ или используйте кнопки ↑ ↓. Порядок сохраняется, модель получает критерии в этом порядке.</p>
+      <div class="actions">
+        <button id="sort-rules" type="button">Сортировать по критичности</button>
+        <span class="hint-inline">Каждое нажатие меняет направление. Порядок: стоп-факторы, сильные минусы, средние, слабые, затем плюсы.</span>
+      </div>
+      <div id="rules"></div>
+      <button id="add-rule" type="button">Добавить критерий</button>
+    </section>
+
+    <section>
+      <h2>Подсветка на странице вакансии</h2>
+      <p class="hint">Красным отмечаются критичные места, жёлтым спорные, зелёным плюсы; при наведении на подсвеченное место видна причина. После кнопки «Оценить вакансию» подсвечиваются места, на которые указала модель.</p>
+      <label class="check">
+        <input id="hlAuto" type="checkbox">
+        Сразу подсвечивать ключевые слова из критериев при открытии вакансии (без обращения к модели)
+      </label>
+      <label class="check">
+        <input id="hlLines" type="checkbox">
+        Рисовать тонкие линии от пунктов «Против» и «За» в панели до подсвеченных мест в тексте вакансии. Линии появляются и исчезают при прокрутке: показываются, только пока видно и пункт, и место в тексте.
+      </label>
+    </section>
+
+    <section>
+      <h2>Духотометр</h2>
+      <p class="hint">Отдельный блок под результатом оценки: стрелочный индикатор и короткая рецензия на тон самого текста вакансии (враждебность, давление, скрытая агрессия или, наоборот, дружелюбие). Для этого делается один дополнительный запрос к модели.</p>
+      <label class="check">
+        <input id="toneOn" type="checkbox">
+        Показывать «Духотометр» после оценки вакансии
+      </label>
+      <label class="check">
+        <input id="roastOn" type="checkbox">
+        Добавить «Прожарку» вакансии: модель отнесётся к тексту максимально критично и составит список вопросов рекрутёру, чтобы закрыть белые пятна. Выполняется в том же запросе, что и Духотометр, поэтому работает только при включённом Духотометре; ответ получается длиннее, а на слабых моделях может быть менее аккуратным.
+      </label>
+    </section>
+
+    <section>
+      <h2>Факты о вашем опыте</h2>
+      <p class="hint">Одна карточка на одно достижение или историю. Из них собираются письма и ответы на вопросы. Чем конкретнее результат, тем лучше.</p>
+      <div id="facts"></div>
+      <button id="add-fact" type="button">Добавить факт</button>
+    </section>
+
+    <section>
+      <h2>Ответы на вопросы работодателя</h2>
+      <p class="hint">Если к вакансии прикреплён тест или анкета, расширение подбирает ответы по вашему резюме, фактам и критериям ниже и вставляет их в поля формы. Отклик оно не отправляет, это делаете вы. Текст, который вы уже ввели в поле, не перезаписывается.</p>
+      <label class="check">
+        <input id="ansEnabled" type="checkbox">
+        Отвечать на вопросы работодателя
+      </label>
+      <label class="check">
+        <input id="ansAuto" type="checkbox">
+        Подбирать и вставлять ответы автоматически, как только форма появилась (иначе по кнопке в панели)
+      </label>
+      <label class="check">
+        <input id="ansVerify" type="checkbox">
+        Проверять ответы на выдуманные факты вторым запросом к модели (дольше, но надёжнее)
+      </label>
+
+      <h3>Критерии ответов</h3>
+      <p class="hint">Три типа. «Правило»: как отвечать. «Запрет»: чего не делать. «Готовый ответ»: заготовка на типовой вопрос, модель использует её дословно или с минимальными правками. В поле «Тема» можно указать, к каким вопросам относится критерий, пустое поле означает «ко всем».</p>
+      <div id="ans-rules"></div>
+      <button id="add-ans-rule" type="button">Добавить критерий ответа</button>
+    </section>
+
+    <section>
+      <h2>Сопроводительные письма</h2>
+      <label>Тон
+        <input id="tone" type="text">
+      </label>
+      <div class="two">
+        <label>Слов не меньше
+          <input id="minWords" type="number" min="30" max="600">
+        </label>
+        <label>Слов не больше
+          <input id="maxWords" type="number" min="30" max="600">
+        </label>
+      </div>
+      <label>Не использовать выражения <span class="hint-inline">(через запятую)</span>
+        <input id="banned" type="text">
+      </label>
+      <label>Подпись <span class="hint-inline">(необязательно)</span>
+        <input id="signature" type="text" placeholder="Имя, контакты">
+      </label>
+      <label class="check">
+        <input id="verify" type="checkbox">
+        Проверять письмо на выдуманные факты вторым запросом к модели (дольше, но надёжнее)
+      </label>
+    </section>
+
+    <section>
+      <h2>Перенос настроек</h2>
+      <p class="hint">Файл содержит резюме, критерии и факты, но не ключ API. Так настройками можно поделиться или перенести их на другой компьютер.</p>
+      <div class="actions">
+        <button id="export" type="button">Скачать настройки</button>
+        <button id="import" type="button">Загрузить из файла</button>
+        <input id="file" type="file" accept="application/json" hidden>
+      </div>
+    </section>
+  </main>
+
+  <script src="defaults.js"></script>
+  <script src="options.js"></script>
+</body>
+</html>

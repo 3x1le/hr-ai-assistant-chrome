@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "Помощник по вакансиям hh.ru",
+  "version": "2.5.2",
+  "description": "Оценивает вакансию по вашим критериям и пишет сопроводительное письмо на основе ваших фактов. Отправляете отклик вы сами.",
+  "permissions": ["storage"],
+  "optional_host_permissions": ["http://*/*", "https://*/*"],
+  "background": { "service_worker": "background.js" },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://hh.ru/vacancy/*", "https://*.hh.ru/vacancy/*",
+        "https://hh.ru/applicant/vacancy_response*", "https://*.hh.ru/applicant/vacancy_response*"
+      ],
+      "js": ["defaults.js", "content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "options_ui": { "page": "options.html", "open_in_tab": true }
+}
